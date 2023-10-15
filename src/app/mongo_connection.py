@@ -5,4 +5,4 @@ from decouple import config
 MONGO_CONNECTION_STRING = config('MONGO_CONNECTION_STRING')
 
 client = MongoClient(MONGO_CONNECTION_STRING)
-db = client['project_management']
+db = client['projetointegradopucminas']
