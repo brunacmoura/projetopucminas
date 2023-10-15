@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, abort, jsonify, request
 from src.app.mongo_connection import db
 from bson import ObjectId, DBRef, json_util
+import re
 
 
 get_projects_router = Blueprint('projects', __name__)
@@ -48,10 +49,16 @@ def get_project_by_page(page: str):
 def create_project():
     data = request.json
     page_value = data['titleCtrl'].lower().replace(' ', '_')
+    project_name = data["titleCtrl"]
+    existing_project = db.projects.find_one(
+        {'name': {'$regex': f'^{re.escape(project_name)}$', '$options': 'i'}})
+    if existing_project:
+        return jsonify({'code': 400,
+                        'error': 'Another project with this title was found.'})
     new_project = {
         'created_at': datetime.utcnow(),
         'updated_at': datetime.utcnow(),
-        'name': data['titleCtrl'],
+        'name': project_name,
         'page': page_value,
         'description': data['descriptionCtrl'],
         'members': [DBRef('users',
@@ -63,4 +70,4 @@ def create_project():
 
     db.projects.insert_one(new_project)
 
-    return jsonify({'message': 'Project created'})
+    return jsonify({'code': 200, 'message': 'Project created'})
