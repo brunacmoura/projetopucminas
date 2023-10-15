@@ -48,7 +48,6 @@ def get_project_by_page(page: str):
 def create_project():
     data = request.json
     page_value = data['titleCtrl'].lower().replace(' ', '_')
-    print(data)
     new_project = {
         'created_at': datetime.utcnow(),
         'updated_at': datetime.utcnow(),
@@ -58,7 +57,8 @@ def create_project():
         'members': [DBRef('users',
                     ObjectId(user_id)) for user_id in data['membersCtrl']],
         'status': data['statusCtrl'],
-        'owner': DBRef('users', data['owner'])
+        'owner': DBRef('users', data['owner']) if 'owner' in data
+        else DBRef('users', '6526e7ef18e97ad0e8159489')
     }
 
     db.projects.insert_one(new_project)
